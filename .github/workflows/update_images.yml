@@ -1,0 +1,23 @@
+name: Update Images List
+on:
+  push:
+    paths:
+      - 'images/**' # Запускать только когда добавляешь картинки
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Generate JSON
+        run: |
+          echo "[" > images.json
+          ls images | grep -E "\.(jpg|jpeg|png|webp|gif)" | sed 's/.*/"&",/' | sed '$ s/,$//' >> images.json
+          echo "]" >> images.json
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add images.json
+          git commit -m "Авто-обновление списка картинок" || exit 0
+          git push
